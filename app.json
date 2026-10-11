@@ -1,11 +1,17 @@
 {
   "expo": {
-    "name": "devly",
+    "name": "Devly",
     "slug": "devly",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      [
+        "expo-image-picker",
+        { "photosPermission": "Devly uses your photos so you can choose a profile picture." }
+      ]
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -20,6 +26,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "splash": {
+      "backgroundColor": "#ECECFB",
+      "resizeMode": "contain",
+      "image": "./assets/splash-icon.png"
     }
   }
 }
