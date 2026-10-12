@@ -86,6 +86,13 @@ const DEFAULTS: Prefs = {
 
 const USER_KEYS = Object.keys(FRESH_USER) as (keyof UserData)[];
 
+// Signed-out state: the learner's data is parked under their email (so signing in again restores it)
+// and the screen is cleared. Theme, accent and reminder settings stay.
+function signedOut(p: Prefs): Prefs {
+  const profiles = p.email ? { ...p.profiles, [p.email.toLowerCase()]: pickUser(p) } : p.profiles;
+  return { ...p, ...FRESH_USER, profiles, name: '', email: '', onboarded: false };
+}
+
 function pickUser(p: Prefs): UserData {
   const out: Partial<UserData> = {};
   for (const k of USER_KEYS) (out as Record<string, unknown>)[k] = p[k];
@@ -132,7 +139,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const loaded: Prefs = { ...DEFAULTS, ...JSON.parse(raw) };
           // Keep the avatar in line with the saved gender.
           if (loaded.gender && !avatarsFor(loaded.gender).includes(loaded.avatar)) loaded.avatar = avatarsFor(loaded.gender)[0];
-          setPrefs(loaded);
+          // Every launch starts at the Get started page. Signing in restores the learner's saved data.
+          setPrefs(loaded.onboarded || loaded.email ? signedOut(loaded) : loaded);
         }
       })
       .catch(() => {})
@@ -195,11 +203,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const endSession = useCallback(
-    () =>
-      setPrefs((cur) => {
-        const profiles = cur.email ? { ...cur.profiles, [cur.email.toLowerCase()]: pickUser(cur) } : cur.profiles;
-        return { ...cur, ...FRESH_USER, profiles, name: '', email: '', onboarded: false };
-      }),
+    () => setPrefs((cur) => signedOut(cur)),
     [],
   );
 
